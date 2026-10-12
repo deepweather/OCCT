@@ -1,0 +1,17 @@
+puts "========================================================================="
+puts "GH1619: Use-after-free in TopOpeBRepBuild CorrectUnclosedWire crashes"
+puts "        BRepFilletAPI_MakeFillet::Build"
+puts "========================================================================="
+puts ""
+
+# Rounding these two edges rebuilds a face whose wire BRepCheck rejects. CorrectUnclosedWire
+# removed that wire's bad edges while a TopoDS_Iterator was walking it and read the freed
+# list node: a crash, or an invalid read under valgrind or AddressSanitizer. The builder
+# must return each time; the rounds themselves do not make a valid solid here.
+
+restore [locate_data_file bug_gh1619.brep] s
+explode s e
+
+for {set i 0} {$i < 20} {incr i} {
+  blend result s 1.25 s_26 1.25 s_35
+}
